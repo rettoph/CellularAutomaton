@@ -48,14 +48,6 @@ namespace CellularAutomaton.Core
             Marshal.FreeHGlobal((nint)_updateIndices);
         }
 
-        public void Update(ICellUpdateService<TData> cellUpdateService)
-        {
-            for (int i = 0; i < this.Length; i++)
-            {
-                this.Update(ref this.Cells[_updateIndices[i]], cellUpdateService);
-            }
-        }
-
         public ref Cell<TData> GetCell(int x, int y, out bool exists)
         {
             return ref this.GetCell(this.CalculateIndex(x, y), out exists);
@@ -106,12 +98,6 @@ namespace CellularAutomaton.Core
             return new Point(index % this.Width, index / this.Width);
         }
 
-        private void Update(ref Cell<TData> cell, ICellUpdateService<TData> cellUpdateService)
-        {
-            cellUpdateService.UpdateCell(ref cell, ref this);
-            cell.Reset();
-        }
-
         private static int* CalculateUpdateIndices(int length)
         {
             int* indices = (int*)Marshal.AllocHGlobal(length * sizeof(int));
@@ -143,7 +129,7 @@ namespace CellularAutomaton.Core
                     return;
                 }
 
-                ptrs[ptrCount++] = (IntPtr)(Cell<TData>*)Unsafe.AsPointer(ref cells[cell]);
+                ptrs[ptrCount++] = (IntPtr)Unsafe.AsPointer(ref cells[cell]);
             }
 
             AddIfExists(ref ptrCount, ref ptrs, this.CalculateIndex(position.X - 1, position.Y - 1), this.Cells);
