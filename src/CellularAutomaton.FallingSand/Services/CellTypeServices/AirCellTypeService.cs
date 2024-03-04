@@ -11,6 +11,8 @@ namespace CellularAutomaton.FallingSand.Services.CellTypeServices
     {
         public CellTypeEnum Type => CellTypeEnum.Air;
 
+        public Color Color => Color.Transparent;
+
         public void Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer vertices)
         {
             if (cell.IdleCount >= 5)

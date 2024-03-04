@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using Microsoft.Xna.Framework;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -85,15 +85,31 @@ namespace CellularAutomaton.Core
         {
             if (index > this.Length)
             {
-                return Point.Empty;
+                return Point.Zero;
             }
 
             if (index < 0)
             {
-                return Point.Empty;
+                return Point.Zero;
             }
 
             return new Point(index % this.Width, index / this.Width);
+        }
+
+        public IEnumerable<int> GetCellIndices(Rectangle bounds)
+        {
+            for(int x = bounds.Left; x < bounds.Right; x++)
+            {
+                for (int y = bounds.Top; y < bounds.Bottom; y++)
+                {
+                    int index = this.CalculateIndex(x, y);
+
+                    if (index != -1)
+                    {
+                        yield return index;
+                    }
+                }
+            }
         }
 
         private Neighbors<TData> CalculateNeighbors(Point position)

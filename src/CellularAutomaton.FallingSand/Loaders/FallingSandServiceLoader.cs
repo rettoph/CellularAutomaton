@@ -13,7 +13,7 @@ namespace CellularAutomaton.FallingSand.Loaders
         public void ConfigureServices(ContainerBuilder services)
         {
             services.RegisterType<World<CellData>>().AsSelf().InstancePerLifetimeScope();
-            services.RegisterType<CellService>().AsImplementedInterfaces().InstancePerLifetimeScope();
+            services.RegisterType<CellService>().AsSelf().AsImplementedInterfaces().InstancePerLifetimeScope();
 
             services.RegisterType<NotImplementedCellTypeService>().AsSelf().InstancePerLifetimeScope();
         }

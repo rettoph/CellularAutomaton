@@ -25,6 +25,11 @@ namespace CellularAutomaton.FallingSand.Services
             }
         }
 
+        ICellTypeService Get(CellTypeEnum type)
+        {
+            return _cellTypeServices[type];
+        }
+
         public void Update(ref Cell<CellData> cell, ref Grid<CellData> grid, VertexCellBuffer vertices)
         {
             ref CellData latest = ref cell.Latest;

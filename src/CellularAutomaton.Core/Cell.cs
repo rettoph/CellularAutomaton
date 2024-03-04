@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+﻿using Microsoft.Xna.Framework;
 using System.Runtime.CompilerServices;
 
 namespace CellularAutomaton.Core

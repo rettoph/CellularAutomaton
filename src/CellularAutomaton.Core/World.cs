@@ -70,7 +70,7 @@ namespace CellularAutomaton.Core
 
             _renderTarget = new RenderTarget2D(_graphics, width, height);
             _gridVertices = new VertexCellBuffer(_grid.Length, _graphics, defaultColor);
-            _cellUpdateOrder = CalculateUpdateIndices(this.Grid.Length);
+            _cellUpdateOrder = CalculateUpdateIndices(this.Grid.Length, width, height);
 
             _initialized = true;
         }
@@ -110,49 +110,62 @@ namespace CellularAutomaton.Core
                 ref Cell<TData> cell = ref this.Grid.Cells[index];
                 this.Update(ref cell);
             }
-        }
 
-        private void Update(ref Cell<TData> cell)
-        {
-            try
+            for (int i = 0; i < this.Grid.Length; i++)
             {
-                if (cell.Asleep)
-                {
-                    return;
-                }
-
-                if (cell.Updated)
-                {
-                    return;
-                }
-
-                _cellService.Update(ref cell, ref this.Grid, _gridVertices);
-            }
-            finally
-            {
+                int index = _cellUpdateOrder[i];
+                ref Cell<TData> cell = ref this.Grid.Cells[index];
                 cell.Reset();
             }
         }
 
-        private static int* CalculateUpdateIndices(int length)
+        private void Update(ref Cell<TData> cell)
+        {
+            if (cell.Asleep)
+            {
+                return;
+            }
+
+            if (cell.Updated)
+            {
+                return;
+            }
+
+            _cellService.Update(ref cell, ref this.Grid, _gridVertices);
+        }
+
+        private static int* CalculateUpdateIndices(int length, int height, int width)
         {
             int* indices = (int*)Marshal.AllocHGlobal(length * sizeof(int));
 
-            int evenLength = (length + (length % 2)) / 2;
-            for (int i = 0; i < evenLength; i++)
+            for (int i = 0; i < length; i++)
             {
-                indices[i * 2] = i * 2;
+                indices[i] = -1;
             }
 
-            int oddLength = length / 2;
-            for (int i = 0; i < oddLength; i++)
+            int index = 0;
+            for(int y = 0; y < height; y++)
             {
-                indices[(i * 2) + 1] = (length - (length % 2)) - ((i * 2) + 1);
+                for (int i = 0; i < width; i++)
+                {
+                    int x = 0;
+                    if(i % 2 == 0)
+                    {
+                        x = i;
+                    }
+                    else
+                    {
+                        x = (width - (width % 2)) - i;
+                    }
+
+                    indices[index++] = x + (y * width);
+                }
             }
 
             for (int i = 0; i < length; i++)
             {
-                if (i >= length || i < 0)
+                index = indices[i];
+                if (index >= length || index < 0)
                 {
                     throw new Exception();
                 }
