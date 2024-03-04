@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework;
 namespace CellularAutomaton.FallingSand.Services.CellTypeServices
 {
     [AutoLoad]
-    internal class SandCellTypeService : BaseGravityCellTypeService
+    internal class WaterCellTypeService : BaseLiquidCellTypeService
     {
-        public SandCellTypeService() : base(CellTypeEnum.Sand, CellTypeEnum.Water, Color.SandyBrown, true)
+        public WaterCellTypeService() : base(CellTypeEnum.Water, CellTypeEnum.Null, Color.Blue, true)
         {
         }
 

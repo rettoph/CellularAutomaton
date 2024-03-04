@@ -31,6 +31,8 @@ namespace CellularAutomaton.Core
         public bool Idle => _idleCount > 0;
         public bool Updated => _updated;
 
+        public Color Color;
+
         /// <summary>
         /// It is the responsibility of the <see cref="Services.ICellService{TData}"/> to
         /// update a cell state as needed

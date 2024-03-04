@@ -11,7 +11,9 @@ namespace CellularAutomaton.FallingSand.Services
     {
         private readonly Dictionary<CellTypeEnum, ICellTypeService> _cellTypeServices;
 
-        public CellService(NotImplementedCellTypeService defaultCellTypeService, IEnumerable<ICellTypeService> cellTypeServices)
+        public ICellTypeService this[CellTypeEnum type] => _cellTypeServices[type];
+
+        public CellService(NullCellTypeService defaultCellTypeService, IEnumerable<ICellTypeService> cellTypeServices)
         {
             _cellTypeServices = cellTypeServices.ToDictionary(x => x.Type, x => x);
 
@@ -30,10 +32,18 @@ namespace CellularAutomaton.FallingSand.Services
             return _cellTypeServices[type];
         }
 
-        public void Update(ref Cell<CellData> cell, ref Grid<CellData> grid, VertexCellBuffer vertices)
+        public void Update(ref Cell<CellData> cell, ref Grid<CellData> grid, VertexCellBuffer<CellData> vertices)
         {
             ref CellData latest = ref cell.Latest;
-            _cellTypeServices[latest.Type].Update(ref cell, ref latest, ref grid, vertices);
+            if (_cellTypeServices[latest.Type].Update(ref cell, ref latest, ref grid, vertices) == false)
+            {
+                vertices.Update(ref cell);
+            }
+        }
+
+        public IEnumerable<ICellTypeService> GetAll()
+        {
+            return _cellTypeServices.Values;
         }
     }
 }

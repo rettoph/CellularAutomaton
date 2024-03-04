@@ -7,20 +7,17 @@ using Microsoft.Xna.Framework;
 namespace CellularAutomaton.FallingSand.Services.CellTypeServices
 {
     [AutoLoad]
-    internal class SandCellTypeService : BaseGravityCellTypeService
+    internal class CementCellType : BaseCellTypeService
     {
-        public SandCellTypeService() : base(CellTypeEnum.Sand, CellTypeEnum.Water, Color.SandyBrown, true)
+        public CementCellType() : base(CellTypeEnum.Cement, Color.Gray, true)
         {
         }
 
         public override bool Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer<CellData> vertices)
         {
-            if (base.Update(ref cell, ref latest, ref grid, vertices))
-            {
-                return true;
-            }
+            base.Update(ref cell, ref latest, ref grid, vertices);
 
-            if (cell.IdleCount >= 100)
+            if (cell.IdleCount >= 1)
             {
                 cell.Asleep = true;
             }

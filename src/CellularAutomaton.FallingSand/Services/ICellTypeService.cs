@@ -14,6 +14,8 @@ namespace CellularAutomaton.FallingSand.Services
 
         CellTypeEnum Type { get; }
 
-        void Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer vertices);
+        bool ValidInput { get; }
+
+        bool Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer<CellData> vertices);
     }
 }

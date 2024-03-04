@@ -26,11 +26,19 @@ namespace CellularAutomaton.Core
 
         private bool _initialized;
         private Grid<TData> _grid;
-        private VertexCellBuffer _gridVertices;
+        private VertexCellBuffer<TData> _gridVertices;
         private int* _cellUpdateOrder;
         private RenderTarget2D _renderTarget;
 
         public ref Grid<TData> Grid => ref _grid;
+
+        public bool RenderAsleep
+        {
+            set
+            {
+                _gridEffect.RenderAsleep = value;
+            }
+        }
 
         public World(GridEffect gridEffect, GraphicsDevice graphics, Camera2D camera, SpriteBatch spriteBatch, ICellService<TData> cellService)
         {
@@ -59,6 +67,8 @@ namespace CellularAutomaton.Core
 
 
             Marshal.FreeHGlobal((nint)_cellUpdateOrder);
+
+            _initialized = false;
         }
 
         public void Initialize(int width, int height, bool wrap, TData defaultData, Color defaultColor)
@@ -69,7 +79,7 @@ namespace CellularAutomaton.Core
             _gridEffect.Width = width;
 
             _renderTarget = new RenderTarget2D(_graphics, width, height);
-            _gridVertices = new VertexCellBuffer(_grid.Length, _graphics, defaultColor);
+            _gridVertices = new VertexCellBuffer<TData>(_grid.Length, _graphics, defaultColor);
             _cellUpdateOrder = CalculateUpdateIndices(this.Grid.Length, width, height);
 
             _initialized = true;
@@ -107,15 +117,13 @@ namespace CellularAutomaton.Core
             for (int i = 0; i < this.Grid.Length; i++)
             {
                 int index = _cellUpdateOrder[i];
-                ref Cell<TData> cell = ref this.Grid.Cells[index];
-                this.Update(ref cell);
+                this.Update(ref this.Grid.Cells[index]);
             }
 
             for (int i = 0; i < this.Grid.Length; i++)
             {
                 int index = _cellUpdateOrder[i];
-                ref Cell<TData> cell = ref this.Grid.Cells[index];
-                cell.Reset();
+                this.Grid.Cells[index].Reset();
             }
         }
 
@@ -144,12 +152,12 @@ namespace CellularAutomaton.Core
             }
 
             int index = 0;
-            for(int y = 0; y < height; y++)
+            for (int y = height - 1; y >= 0; y--)
             {
                 for (int i = 0; i < width; i++)
                 {
                     int x = 0;
-                    if(i % 2 == 0)
+                    if (i % 2 == 0)
                     {
                         x = i;
                     }

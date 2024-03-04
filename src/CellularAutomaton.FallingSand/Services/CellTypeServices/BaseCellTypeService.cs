@@ -11,17 +11,41 @@ namespace CellularAutomaton.FallingSand.Services.CellTypeServices
 
         public Color Color { get; }
 
-        public BaseCellTypeService(CellTypeEnum type, Color color)
+        public bool ValidInput { get; }
+
+        public BaseCellTypeService(CellTypeEnum type, Color color, bool validInput)
         {
             this.Type = type;
             this.Color = color;
+            this.ValidInput = validInput;
         }
 
-        public abstract void Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer vertices);
-
-        protected void Swap(ref Cell<CellData> cellA, ref CellData latestCellAData, ref Cell<CellData> cellB, VertexCellBuffer vertices)
+        public virtual bool Update(ref Cell<CellData> cell, ref CellData latest, ref Grid<CellData> grid, VertexCellBuffer<CellData> vertices)
         {
+            if (this.SetColor(ref cell))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        protected virtual bool SetColor(ref Cell<CellData> cell)
+        {
+            if (cell.Color == this.Color)
+            {
+                return false;
+            }
+
+            cell.Color = this.Color;
+            return true;
+        }
+
+        protected bool Swap(ref Cell<CellData> cellA, ref CellData latestCellAData, ref Cell<CellData> cellB, VertexCellBuffer<CellData> vertices)
+        {
+            Color colorPlaceholder = cellA.Color;
             cellA.New = cellB.Latest;
+            cellA.Color = cellB.Color;
             cellA.Asleep = false;
             for (int i = 0; i < cellA.Neighbors.Length; i++)
             {
@@ -29,14 +53,17 @@ namespace CellularAutomaton.FallingSand.Services.CellTypeServices
             }
 
             cellB.New = latestCellAData;
+            cellB.Color = colorPlaceholder;
             cellB.Asleep = false;
-            for(int i=0; i<cellB.Neighbors.Length; i++)
+            for (int i = 0; i < cellB.Neighbors.Length; i++)
             {
                 cellB.Neighbors[i].Asleep = false;
             }
 
+            vertices.Update(ref cellA);
+            vertices.Update(ref cellB);
 
-            vertices.Swap(cellA.Index, cellB.Index);
+            return true;
         }
     }
 }

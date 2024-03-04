@@ -4,11 +4,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace CellularAutomaton.Core.Utilities
 {
-    public class VertexCellBuffer : IDisposable
+    public unsafe class VertexCellBuffer<TData> : IDisposable
+        where TData : unmanaged
     {
         private readonly GraphicsDevice _graphics;
         private readonly VertexBuffer _buffer;
-        private readonly VertexCell[] _vertices;
+        public readonly VertexCell[] _vertices;
 
         public readonly int Length;
 
@@ -37,22 +38,17 @@ namespace CellularAutomaton.Core.Utilities
             _buffer.SetData(_vertices);
         }
 
-        public void Set(int index, Color color)
+        public unsafe void Update(ref Cell<TData> cell)
         {
-            _vertices[index].Color = color.PackedValue;
-        }
+            _vertices[cell.Index].Color = cell.Color.PackedValue;
+            _vertices[cell.Index].Asleep = cell.Asleep;
 
-        public void Swap(int indexA, int indexB)
-        {
-            uint placeholder = _vertices[indexA].Color;
-
-            _vertices[indexA].Color = _vertices[indexB].Color;
-            _vertices[indexB].Color = placeholder;
+            // _buffer.SetData(cell.Index * sizeof(VertexCell), _vertices, cell.Index, 1, sizeof(VertexCell));
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
     }
 }
