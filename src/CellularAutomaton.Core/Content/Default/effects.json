@@ -1,0 +1,8 @@
+[
+  {
+    "type": "EffectCode",
+    "values": {
+      "EffectCode.Grid": "Effects\\Compiled\\Grid.mgfx"
+    }
+  }
+]

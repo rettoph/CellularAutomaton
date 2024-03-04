@@ -7,7 +7,7 @@ namespace CellularAutomaton.Core
         where TData : unmanaged
     {
         private bool _updated;
-        private int _inactivityCount;
+        private int _idleCount;
         private bool _asleep;
 
         private TData _dataA;
@@ -27,8 +27,14 @@ namespace CellularAutomaton.Core
         public ref TData Old => ref _oldPtr[0];
         public ref TData Latest => ref this.GetLatest();
 
-        public int InactivityCount => _inactivityCount;
+        public int IdleCount => _idleCount;
+        public bool Idle => _idleCount > 0;
         public bool Updated => _updated;
+
+        /// <summary>
+        /// It is the responsibility of the <see cref="Services.ICellService{TData}"/> to
+        /// update a cell state as needed
+        /// </summary>
         public bool Asleep
         {
             get => _asleep;
@@ -41,11 +47,9 @@ namespace CellularAutomaton.Core
 
         public Cell(Point position, int index, Neighbors<TData> neighbors)
         {
-            _newPtr = (TData*)Unsafe.AsPointer(ref _dataA);
-            _oldPtr = (TData*)Unsafe.AsPointer(ref _dataB);
-
             this.Position = position;
             this.Index = index;
+            this.Neighbors = neighbors;
         }
 
         public void Dispose()
@@ -53,21 +57,29 @@ namespace CellularAutomaton.Core
             this.Neighbors.Dispose();
         }
 
+        internal void Initialize()
+        {
+            _newPtr = (TData*)Unsafe.AsPointer(ref _dataA);
+            _oldPtr = (TData*)Unsafe.AsPointer(ref _dataB);
+        }
+
         public void Reset()
         {
-            if (_updated == (_updated = false))
+            if (_updated == false)
             {
-                _inactivityCount++;
+                _idleCount++;
             }
             else
             {
-                _inactivityCount = 0;
-                this.Asleep = false;
+                _updated = false;
+                _idleCount = 0;
+                _asleep = false;
 
-                TData* old = (TData*)Unsafe.AsPointer(ref _newPtr[0]);
+                TData* old = _newPtr;
                 _newPtr = _oldPtr;
-                _newPtr[0] = default;
                 _oldPtr = old;
+
+                _newPtr[0] = default;
             }
         }
 

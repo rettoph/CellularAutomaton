@@ -1,5 +1,4 @@
-﻿using CellularAutomaton.Core.Services;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -8,8 +7,6 @@ namespace CellularAutomaton.Core
     public unsafe struct Grid<TData> : IDisposable
         where TData : unmanaged
     {
-        private readonly int* _updateIndices;
-
         public readonly int Width;
         public readonly int Height;
         public readonly int Length;
@@ -17,7 +14,7 @@ namespace CellularAutomaton.Core
 
         public readonly Cell<TData>* Cells;
 
-        public Grid(int width, int height, bool wrap)
+        public Grid(int width, int height, bool wrap, TData defaultData)
         {
             this.Width = width;
             this.Height = height;
@@ -25,15 +22,17 @@ namespace CellularAutomaton.Core
             this.Wrap = wrap;
 
             this.Cells = (Cell<TData>*)Marshal.AllocHGlobal(this.Length * sizeof(Cell<TData>));
-            _updateIndices = CalculateUpdateIndices(this.Length);
 
             for (int i = 0; i < this.Length; i++)
             {
                 Point position = this.CalculatePosition(i);
-                this.Cells[0] = new Cell<TData>(
+                this.Cells[i] = new Cell<TData>(
                     position: position,
                     index: i,
                     neighbors: this.CalculateNeighbors(position));
+
+                this.Cells[i].Initialize();
+                this.Cells[i].Old = defaultData;
             }
         }
 
@@ -45,7 +44,6 @@ namespace CellularAutomaton.Core
             }
 
             Marshal.FreeHGlobal((nint)this.Cells);
-            Marshal.FreeHGlobal((nint)_updateIndices);
         }
 
         public ref Cell<TData> GetCell(int x, int y, out bool exists)
@@ -96,25 +94,6 @@ namespace CellularAutomaton.Core
             }
 
             return new Point(index % this.Width, index / this.Width);
-        }
-
-        private static int* CalculateUpdateIndices(int length)
-        {
-            int* indices = (int*)Marshal.AllocHGlobal(length * sizeof(int));
-
-            int evenLength = (length + (length % 2)) / 2;
-            for (int i = 0; i < evenLength; i++)
-            {
-                indices[i * 2] = i * 2;
-            }
-
-            int oddLength = length / 2;
-            for (int i = 0; i < oddLength; i++)
-            {
-                indices[(i * 2) + 1] = (length - (length % 2)) - ((i * 2) + 1);
-            }
-
-            return indices;
         }
 
         private Neighbors<TData> CalculateNeighbors(Point position)
