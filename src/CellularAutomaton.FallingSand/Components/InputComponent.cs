@@ -68,17 +68,28 @@ namespace CellularAutomaton.FallingSand.Components
                 return;
             }
 
-            IEnumerable<int>? indices = _world.Grid.GetCellIndices(new Rectangle(_brush.X / 2, _brush.Y / 2, _size, _size));
+            IEnumerable<int>? indices = _world.Grid.GetCellIndices(new Rectangle((_brush.X / 2) - 1, (_brush.Y / 2) - 1, _size + 2, _size + 2));
 
             if (indices is null)
             {
                 return;
             }
 
+            int minX = (_brush.X / 2);
+            int minY = (_brush.Y / 2);
+
+            int maxX = (minX + _size);
+            int maxY = (minY + _size);
+
             foreach (int index in indices)
             {
                 ref Cell<CellData> cell = ref _world.Grid.Cells[index];
-                cell.Latest.Type = _validInputs[_inputIndex];
+
+                if (cell.Position.X > minX && cell.Position.X < maxX && cell.Position.Y > minY && cell.Position.Y < maxY)
+                {
+                    cell.Latest.Type = _validInputs[_inputIndex];
+                }
+
                 cell.Asleep = false;
             }
         }
